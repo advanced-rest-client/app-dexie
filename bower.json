@@ -1,0 +1,41 @@
+{
+  "name": "app-dexie",
+  "description": "A database wrapper for ARC",
+  "author": "Pawel Psztyc, The ARC team",
+  "keywords": [
+    "web-components",
+    "polymer"
+  ],
+  "private": true,
+  "main": [
+    "app-dexie.html"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:advanced-rest-client/app-dexie.git"
+  },
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "dexie": "^1.4.2",
+    "app-types": "advanced-rest-client/app-types#^1.0.1",
+    "uuid-generator": "advanced-rest-client/uuid-generator#^1.0.2",
+    "cookie-parser": "advanced-rest-client/cookie-parser#^1.0.9"
+  },
+  "devDependencies": {
+    "iron-component-page": "polymerelements/iron-component-page#1.0.0",
+    "web-component-tester": "^4.0.0",
+    "paper-styles": "polymerelements/paper-styles#^1.0.2",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tasks"
+  ],
+  "version": "1.0.0"
+}
