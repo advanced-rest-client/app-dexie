@@ -34,7 +34,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     suite('basic', function() {
       test('should handle database-request event', function(done) {
         var element = fixture('basic');
-        var fn = (e) => {
+        var fn = () => {
           element.removeEventListener('dexie-changed', fn);
           var detail = {'detail': {}};
           var event = new CustomEvent('database-request', detail);
