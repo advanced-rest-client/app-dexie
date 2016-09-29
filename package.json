@@ -1,6 +1,6 @@
 {
   "name": "app-dexie",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "LICENSE.md",
   "description": "A database wrapper for ARC",
   "devDependencies": {
