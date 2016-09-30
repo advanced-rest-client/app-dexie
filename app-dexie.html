@@ -18,10 +18,15 @@ the License.
 <script src="../dexie/dist/dexie.min.js"></script>
 <script src="../uri.js/src/URI.min.js"></script>
 <script src="../cookie-parser/cookie-parser.js"></script>
+<script src="old-database.js"></script>
 <!--
 `<app-dexie>` A database wrapper for ARC
-It contains all database structure definitions and create them when needed.
-It also listens for the `database-request` event to return a database object (Dexie JS).
+It contains access to old database structure. New Database is different and this element should be
+used to move the data from old structure to the new one.
+
+This element listen for the `old-database-request` event. This event will return a `database`
+property in the `detail` object containing a promise that will resolve with handler to the Dexie
+or reject during the error.
 
 ### Example
 ```
@@ -55,7 +60,11 @@ It also listens for the `database-request` event to return a database object (De
             type: Object,
             readOnly: true,
             notify: true
-          }
+          },
+          /**
+           * Name of the storage to initialize
+           */
+          name: String
         };
       }
 
@@ -67,38 +76,36 @@ It also listens for the `database-request` event to return a database object (De
         this._eventTarget = Polymer.dom(this).host || document;
         this.listen(
           this._eventTarget,
-          'database-request',
+          'old-database-request',
           'databaseRequested');
       }
 
       detached() {
         this.unlisten(
           this._eventTarget,
-          'database-request',
+          'old-database-request',
           'databaseRequested');
       }
 
       initDatabase() {
-        return new Dexie.Promise((resolve, reject) => {
-          var db = this._getDb();
-          this._mapsObjects(db);
-          this._addHooks(db);
-
-          db.open()
-          .then(() => {
+        if (this.dexie) {
+          return Dexie.Promise.resolve(this.dexie);
+        } else {
+          this.oldApp = new OldAppDexie();
+          return this.oldApp.init()
+          .then((db) => {
             this._setDexie(db);
-            resolve(db);
-          })
-          .catch((error) => {
+            return db;
+          }).catch((e) => {
             console.error('IDB open main catch block', error);
             this.fire('send-analytics', {
               'type': 'exception',
               'critical': false,
               'description': 'Dexie error: ' + error.message
             });
-            reject(error);
+            throw err;
           });
-        });
+        }
       }
 
       databaseRequested(event) {
@@ -107,147 +114,6 @@ It also listens for the `database-request` event to return a database object (De
           return;
         }
         event.detail.database = Dexie.Promise.resolve(this.dexie);
-      }
-
-      /**
-       * Returns a handler to the database object.
-       */
-      _getDb(opts) {
-        opts = opts || {};
-        var db = new Dexie('arc');
-        db.version(1)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds'
-          });
-        db.version(2)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type'
-          });
-        db.version(3)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type',
-            basicAuth: '&url'
-          });
-        db.version(4)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type',
-            basicAuth: '&url',
-            logs: '&time,type'
-          });
-        db.version(5)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type',
-            basicAuth: '&url',
-            logs: '&time,type',
-            cookies: '&uuid,domain,path,name,[domain+path]'
-          });
-        db.version(6)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type',
-            basicAuth: '&url',
-            logs: '&time,type',
-            cookies: '&uuid,_domain,name'
-          });
-        db.version(7)
-          .stores({
-            headers: '&[key+type],key,type',
-            statuses: '&key',
-            historyUrls: '&url',
-            historySockets: '&url',
-            requestObject: '++id,url,method,[url+method],type,_name',
-            serverExportObjects: '[serverId+requestId],serverId,requestId',
-            projectObjects: '++id,*requestIds',
-            variables: '++id,variable,type',
-            basicAuth: '&url,type',
-            logs: '&time,type',
-            cookies: '&uuid,_domain,name'
-          }).upgrade(function(tx) {
-            tx.basicAuth.toCollection().modify(function(item) {
-              item.type = 'basic';
-            });
-          });
-        return db;
-      }
-
-      _mapsObjects(db) {
-        // From `app-types`
-        db.projectObjects.mapToClass(ProjectObject);
-        db.serverExportObjects.mapToClass(ServerExportedObject);
-        db.requestObject.mapToClass(RequestObject);
-        db.historySockets.mapToClass(HistorySocketObject);
-        db.historyUrls.mapToClass(HistoryUrlObject);
-        db.statuses.mapToClass(HttpStatusObject);
-        db.headers.mapToClass(HttpHeaderObject);
-        db.variables.mapToClass(MagicVariableObject);
-        db.basicAuth.mapToClass(AuthData);
-        db.logs.mapToClass(LogObject);
-        db.cookies.mapToClass(Cookie);
-      }
-
-      _addHooks(db) {
-        var createUpdateTime = (primKey, obj) => {
-          obj.updateTime = Date.now();
-        };
-        var updateUpdateTime = (/*modifications, primKey, obj*/) => {
-          return {
-            updateTime: Date.now()
-          };
-        };
-        var createDbUuid = () => {
-          return this.$.uuid.generate();
-        };
-
-        db.projectObjects.hook('creating', createUpdateTime);
-        db.projectObjects.hook('updating', updateUpdateTime);
-
-        db.requestObject.hook('creating', createUpdateTime);
-        db.requestObject.hook('updating', updateUpdateTime);
-
-        db.variables.hook('creating', createUpdateTime);
-        db.variables.hook('updating', updateUpdateTime);
-
-        db.cookies.hook('creating', createDbUuid);
       }
     }
 
