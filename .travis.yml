@@ -1,18 +1,26 @@
 language: node_js
 sudo: required
-before_script:
-- npm install -g bower polylint web-component-tester
-- bower install
-- polylint
+dist: trusty
 node_js: stable
+before_script:
+- npm install --silent -g bower polymer-cli
+- bower install --silent
 addons:
-  firefox: '46.0'
-  apt:
-    sources:
-    - google-chrome
-    packages:
-    - google-chrome-stable
   sauce_connect: true
 script:
-- xvfb-run wct
-dist: trusty
+- polymer lint app-dexie.html
+- polymer test --plugin sauce --job-name "app-dexie:${TRAVIS_BRANCH}" --build-number=${TRAVIS_BUILD_NUMBER}
+cache:
+  directories:
+  - bower_components
+  - node_modules
+branches:
+  only:
+    - stage
+    - develop
+after_success:
+  - node tasks/ci.js
+env:
+  global:
+  - secure: JyhbCQiz/n9KXeKcGOs5js1ZHh+WkV4mCH/tWn4k+rxT4bLPWdaS/VNgdjuvsRK6nrRZp+8FqItoyJbrwNtpMEJwnaq+oJXxrTuAE8vW6e2ZK2x7w25MHRzOpAP80bUBJaqiM6P2kezaT5vMuxDRaDVKp4UinKcNBd4QfOLCZrEN2GIt6Jac8AMIiliP/Iili4NhlosjWaFIpo0qi7C/VG1E46hjn/xtXjmq7hjNEsQtlIAA1h5afh4HTAkOzH5lh9oxsIffMF5CpA6Z3x6FvJl0/x41+ersWm2FNjswaBlXcILje0FuuURnq8pU1on/HiHQ68OKlSv4OowKmz5XK+OU2gvVMrTrfd1PPQzf6k2+QNBmkhYBKrVW4rkThjq67UWQ21D3/lvrvM1nDPBaHIYbl1YRtvj1ibjXuxm2UKCJJAvxwCyNURHjVaoSdj/jkoFaHf5/zqnpDbEI+walav9TmRJRnB1Np4AlTOqAO5qb73Kn+LXKeR47yCQdVBko/7x/Lp9Wg9ztOlJTKXbKg8E0yUxjXXgVVitt8d1y1pyIy32V0JoMP7umqZ37GebTw8bGQTNbipPRi1Vy2/MqndqKLHblUlsXkEAONAdyR1ZIcsxhponJ2zX36kBMoWRbZFh9TmO9EfLK9QnwIIQKldSPvKkzWM9uQyNsAUiFBR8=
+  - secure: U2UGRR+98d7XmFFSxR0/yMpvu4dBIdKBu2pJM6SKg9h7yRHIyE/5G5w0nqcx/8Qw8jyo7hG5F9yONLR25H7Bhn51qi+kYxrCj7lAPPQSVvPQP8DVWqv+T5tueMoKxEL2RKBiCHUdsYHtK1SyBEwA64SQmQc6OrPze0VwhxPDlfe8tdThuNuiu//V7SKVg/zIaE9z3awfGm+OtLa2Nh+Q/ZQTa+AcOXjFvrrG3ff1RIkLDS6vIoznpCSsqSrE4cEi01n02CNjDh+3mIRi7zjuvrNRaZfL8224lTBXaoVzdhYngaRuX1j7yYr1wrYpYAqmodxaIJPfJ+aOiAKtwSXbvtgP//A2V3eYJFDv96bt4nXnTHH8hKBKTW4X6hPkg79T8XbIYuRJdEFojYZ/b7qmeCpqfKGAJs9sIpaHrTz60kJKZe6fsaYfXL1X/mr1nvdDTXYgaMnzoifOaqo9+gQez5HxNQ/Dd2GZsADufwiXpaCMrG9eaRvyO/nPfCQroAasTioKF4EvwsTXcdu1nkSYgyK8NarQWs17JL6Y9ggGBCU7+iQXziF+Z7xPAtdKMtIWQ2ijJS9Nhh+/VmJ3g8vW8o5P/OapVxb8/6OuuFrQKH8N6x1vm1fX/jRZDWMvhisItRHrny9W6kX54mxpMbBwdTd0izzHgUQ44KgCR7W3oO0=

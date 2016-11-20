@@ -4,7 +4,10 @@
   "author": "Pawel Psztyc, The ARC team",
   "keywords": [
     "web-components",
-    "polymer"
+    "polymer",
+    "dexie",
+    "database",
+    "indexeddb"
   ],
   "private": true,
   "main": [
